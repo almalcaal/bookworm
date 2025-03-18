@@ -70,27 +70,32 @@ export const registerUser = async (req, res) => {
 // @route           POST /api/auth/login
 // @access          Public
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
 
+    const user = await User.findOne({ email });
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const correctPassword = await user.matchPassword(password);
+    const correctPassword = await user.comparePassword(password);
     if (!correctPassword) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    generateToken(res, user._id);
+    const token = generateToken(user._id);
 
     res.status(200).json({
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      profilePic: user.profilePic,
+      token,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePic: user.profilePic,
+      },
     });
   } catch (err) {
     console.log("Error in loginUser controller", err.message);
