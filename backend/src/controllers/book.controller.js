@@ -63,3 +63,49 @@ export const getPosts = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// @desc            Get current user posts
+// @route           GET /api/books/users
+// @access          Private
+export const getCurrentUserPosts = async (req, res) => {
+  try {
+    const books = await Book.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
+    res.status(200).json(books);
+  } catch (err) {
+    console.log("ERROR in getCurrentUserPosts controller", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// @desc            Delete post by id
+// @route           DELETE /api/books/:postId
+// @access          Private
+export const deletePost = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.postId);
+    if (!book) return res.status(404).json({ message: "Post not found" });
+
+    // check if user owns the post
+    if (book.user.toString() !== req.user._id.toString()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // delete image from cloudinary
+    if (book.image && book.image.includes("cloudinary")) {
+      try {
+        const publicId = book.image.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+      } catch (cloudinaryErr) {
+        console.log("ERROR deleting image from cloudinary", cloudinaryErr);
+      }
+    }
+
+    await book.deleteOne();
+    res.json({ message: "Post deleted successfully" });
+  } catch (err) {
+    console.log("ERROR in deletePost controller", err.message);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
