@@ -13,6 +13,7 @@ import React, { useState } from "react";
 import { Image } from "expo-image";
 import COLORS from "../../constants/colors";
 import { Ionicons } from "@expo/vector-icons";
+import { useAuthStore } from "../../store/authStore";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -20,7 +21,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {};
+  const { user, sayHello, setUser } = useAuthStore();
+
+  console.log("user is here:", user);
+
+  const handleLogin = () => {
+    setUser({ name: "bob" });
+  };
 
   return (
     <KeyboardAvoidingView
