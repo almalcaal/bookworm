@@ -1,4 +1,4 @@
-import { generateToken } from "../lib/utils.js";
+import { generateToken, validateEmail } from "../lib/utils.js";
 import User from "../models/user.model.js";
 
 // @desc            Register a new user
@@ -29,6 +29,11 @@ export const registerUser = async (req, res) => {
     const existingUsername = await User.findOne({ username });
     if (existingUsername) {
       return res.status(400).json({ message: "Username already in use" });
+    }
+
+    const validEmail = validateEmail(email);
+    if (!validEmail) {
+      return res.status(400).json({ message: "Invalid email" });
     }
 
     const existingEmail = await User.findOne({ email });
