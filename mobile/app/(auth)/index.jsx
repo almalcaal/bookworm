@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
 import { Link } from "expo-router";
 import { style } from "../../assets/styles/login.style";
@@ -19,14 +20,15 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { user, sayHello, setUser } = useAuthStore();
+  const { isLoading, login } = useAuthStore();
 
-  console.log("user is here:", user);
+  const handleLogin = async () => {
+    const result = await login(email, password);
 
-  const handleLogin = () => {
-    setUser({ name: "bob" });
+    if (!result.success) {
+      Alert.alert("Error", result.error);
+    }
   };
 
   return (

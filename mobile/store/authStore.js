@@ -36,6 +36,70 @@ export const useAuthStore = create((set) => ({
       return { success: true };
     } catch (err) {
       set({ isLoading: false });
+      console.log("Error in register useAuthStore:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  login: async (email, password) => {
+    set({ isLoading: true });
+
+    try {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) throw new Error(data.message || "Something went wrong");
+
+      //   comes from data returned from auth.controller.js
+      await AsyncStorage.setItem("user", JSON.stringify(data.user));
+      await AsyncStorage.setItem("token", data.token);
+
+      set({ token: data.token, user: data.user, isLoading: false });
+
+      return { success: true };
+    } catch (err) {
+      set({ isLoading: false });
+      console.log("Error in login useAuthStore:", err);
+      return { success: false, error: err.message };
+    }
+  },
+
+  checkAuth: async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userJson = await AsyncStorage.getItem("user");
+      const user = userJson ? JSON.parse(userJson) : null;
+
+      set({ token, user });
+
+      return { success: true };
+    } catch (err) {
+      console.log("Error in checkAuth authStore:", err);
+
+      return { success: false, error: err.message };
+    }
+  },
+
+  logout: async () => {
+    try {
+      await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("user");
+      set({ token: null, user: null });
+
+      return { success: true };
+    } catch (err) {
+      console.log("Error in logout useAuthStore:", err);
+
       return { success: false, error: err.message };
     }
   },
