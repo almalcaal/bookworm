@@ -21,7 +21,7 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const { isLoading, login } = useAuthStore();
+  const { isLoading, login, isCheckingAuth } = useAuthStore();
 
   const handleLogin = async () => {
     const result = await login(email, password);
@@ -30,6 +30,10 @@ export default function Login() {
       Alert.alert("Error", result.error);
     }
   };
+
+  if (isCheckingAuth) {
+    return null;
+  }
 
   return (
     <KeyboardAvoidingView
