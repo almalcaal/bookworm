@@ -12,7 +12,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 job.start();
-app.use(express.json()); // allows us to parse json data in body
+app.use(
+  express.json({
+    limit: "100mb",
+  })
+); // allows us to parse json data in body
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));
 
