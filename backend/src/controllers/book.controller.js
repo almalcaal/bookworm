@@ -23,6 +23,8 @@ export const createPost = async (req, res) => {
       user: req.user._id,
     });
 
+    await newBook.save();
+
     res.status(201).json({ newBook });
   } catch (err) {
     console.log(`ERROR in createPost controller`, err.message);
